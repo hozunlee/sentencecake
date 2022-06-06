@@ -18,22 +18,34 @@ const Home = () => {
     const [loading, setLoading] = useState(false);
 
     useEffect(() => {
-        firebase_db
-            .ref("/data")
-            .once("value")
-            .then((snapshot) => {
-                console.log("파이어베이스에서 데이터 가져왔습니다!!");
-                let wording = snapshot.val();
-                setData(wording);
-                setLoading(true);
-            });
+        async function loadData() {
+            try {
+                await firebase_db
+                    .ref("/data")
+                    .once("value")
+                    .then((snapshot) => {
+                        console.log("파이어베이스에서 데이터 가져왔습니다!!");
+                        let wording = snapshot.val();
+                        setData(wording);
+                        let todaysQuote1 =
+                            wording[Math.floor(Math.random() * data.length)];
+                        setTodaysQuote(todaysQuote1);
+                    });
+            } catch (e) {
+                console.log("firebase get Error");
+            }
+        }
+        loadData();
     }, []);
 
-    useEffect(() => {
-        console.log("data받아온", data);
+    // useEffect(() => {
+    //     getNewQuote();
+    // }, [data]);
+
+    function getNewQuote() {
         let todaysQuote1 = data[Math.floor(Math.random() * data.length)];
         setTodaysQuote(todaysQuote1);
-    }, [data]);
+    }
 
     return (
         <div>
@@ -41,7 +53,7 @@ const Home = () => {
                 {todaysQuote === undefined ? (
                     <>하이하이</>
                 ) : (
-                    <div className="flex-col justify-center items-center w-screen ">
+                    <div className="flex-col justify-center items-center w-screen h-screen">
                         <Letter imgSrc={todaysQuote.img} />
                         <div className="w-full flex-col justify-center text-center my-10">
                             <div className="">{todaysQuote.item}</div>
@@ -58,6 +70,9 @@ const Home = () => {
                                     );
                                 })}
                             </div>
+                            <button onClick={() => getNewQuote()}>
+                                new cake
+                            </button>
                         </div>
                     </div>
                 )}

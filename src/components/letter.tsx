@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from "react";
 
-const Letter = <T extends unknown>(imgKey: T) => {
+const Letter = <T extends { imgSrc?: string }>(imgKey: T, src: {}) => {
     const [imgSrc, setImgSrc] = useState<string>();
 
     useEffect(() => {
+        console.log(imgKey.imgSrc);
         const getImg = <T extends unknown>(img: T) => {
             fetch(`https://source.unsplash.com/featured/?${img}`).then(
                 (response) => {
@@ -12,7 +13,7 @@ const Letter = <T extends unknown>(imgKey: T) => {
                 }
             );
         };
-        getImg(imgKey);
+        getImg(imgKey.imgSrc);
     }, [imgKey]);
     return (
         <div className="flex justify-center">
