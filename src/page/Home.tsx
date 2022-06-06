@@ -1,47 +1,64 @@
+import Greetings from "components/Hello";
+import Letter from "components/letter";
 import { firebase_db } from "firebaseConfig";
-import React from "react";
+import React, { useEffect, useState } from "react";
 
 const Home = () => {
     type sentence = {
         idx: number;
+        img?: string;
         from: string;
         author: string;
         keyword: [];
         item: string;
     };
 
-    const [data, setData] = React.useState<sentence[]>([]);
+    const [data, setData] = useState<sentence[]>([]);
+    const [todaysQuote, setTodaysQuote] = useState<sentence>();
+    const [loading, setLoading] = useState(false);
 
-    React.useEffect(() => {
-        //뒤의 1000 숫자는 1초를 뜻함
-        //1초 뒤에 실행되는 코드들이 담겨 있는 함수
-        setTimeout(() => {
-            //꿀팁 데이터로 모두 초기화 준비
-            firebase_db
-                .ref("/data")
-                .once("value")
-                .then((snapshot) => {
-                    console.log("파이어베이스에서 데이터 가져왔습니다!!");
-                    let wording = snapshot.val();
-                    setData(wording);
-                });
-        }, 500);
+    useEffect(() => {
+        firebase_db
+            .ref("/data")
+            .once("value")
+            .then((snapshot) => {
+                console.log("파이어베이스에서 데이터 가져왔습니다!!");
+                let wording = snapshot.val();
+                setData(wording);
+                setLoading(true);
+            });
     }, []);
+
+    useEffect(() => {
+        console.log("data받아온", data);
+        let todaysQuote1 = data[Math.floor(Math.random() * data.length)];
+        setTodaysQuote(todaysQuote1);
+    }, [data]);
+
     return (
         <div>
-            hello
             <div>
-                {data === undefined ? (
-                    <></>
+                {todaysQuote === undefined ? (
+                    <>하이하이</>
                 ) : (
-                    <div>
-                        {data.map((item) => {
-                            return (
-                                <button className="w-10 border-2">
-                                    {item.item}
-                                </button>
-                            );
-                        })}
+                    <div className="flex-col justify-center items-center w-screen ">
+                        <Letter imgSrc={todaysQuote.img} />
+                        <div className="w-full flex-col justify-center text-center my-10">
+                            <div className="">{todaysQuote.item}</div>
+                            <div className="">{todaysQuote.from}</div>
+                            <div>{todaysQuote.author}</div>
+                            <div className="flex justify-center">
+                                {todaysQuote.keyword.map((keyword, index) => {
+                                    return (
+                                        <div key={index}>
+                                            <button className="text-sm border rounded-2xl p-2 cursor-pointer shadow-sm bg-blue-400 ">
+                                                {keyword}{" "}
+                                            </button>
+                                        </div>
+                                    );
+                                })}
+                            </div>
+                        </div>
                     </div>
                 )}
             </div>
